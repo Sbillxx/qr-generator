@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>PROOFR — QR Matrix Print Proof</title>
   <meta name="description" content="Generator kode QR dengan kalibrasi lembar proof cetak presisi tinggi." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -49,6 +49,7 @@
       font-size: 14px;
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
     }
 
     /* Sharp corners & no soft blurry shadows */
@@ -62,17 +63,16 @@
       outline-offset: 1px;
     }
 
-    /* Main Grid: Control Panel (Left) & Proof Stage (Right) */
+    /* Top Nav (Mobile Only) */
+    .mobile-top-bar {
+      display: none;
+    }
+
+    /* Main Grid Layout */
     .app-shell {
       display: grid;
       grid-template-columns: 460px 1fr;
       min-height: 100vh;
-    }
-
-    @media (max-width: 1040px) {
-      .app-shell {
-        grid-template-columns: 1fr;
-      }
     }
 
     /* ========================================================
@@ -110,6 +110,7 @@
       height: 6px;
       background: var(--marigold);
       display: inline-block;
+      flex-shrink: 0;
     }
 
     h1.brand-title {
@@ -215,7 +216,7 @@
       font-size: 0.72rem;
       font-weight: 600;
       letter-spacing: 0.04em;
-      padding: 4px 8px;
+      padding: 5px 9px;
       cursor: pointer;
       text-transform: uppercase;
       transition: all 0.12s ease;
@@ -887,9 +888,218 @@
     .toast.show {
       display: block;
     }
+
+    /* ========================================================
+       MOBILE-FIRST RESPONSIVE OPTIMIZATION (< 980px)
+       Preview QR di ATAS, Pernak-pernik Input langsung DI BAWAHNYA
+       ======================================================== */
+    @media (max-width: 980px) {
+      .mobile-top-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        background: var(--petrol-panel);
+        border-bottom: 1px solid var(--petrol-line);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .mobile-brand {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .mobile-title {
+        font-size: 1.15rem;
+        font-weight: 900;
+        font-variation-settings: "wdth" 125, "wght" 900;
+        letter-spacing: -0.02em;
+        text-transform: uppercase;
+        color: var(--paper);
+      }
+
+      .mobile-status {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--marigold);
+      }
+
+      .app-shell {
+        display: flex;
+        flex-direction: column;
+        min-height: auto;
+      }
+
+      /* 1. PREVIEW QR DI PALING ATAS */
+      .proof-stage {
+        order: 1;
+        padding: 16px 12px 14px;
+        min-height: auto;
+        background: var(--petrol-deep);
+      }
+
+      .stage-label-top,
+      .stage-controls-top {
+        display: none;
+      }
+
+      /* Lembar Proof Cetak yang kompak, pas dan tajam */
+      .proof-sheet {
+        max-width: 390px;
+        width: 100%;
+        padding: 16px 18px 14px;
+        margin: 0 auto;
+      }
+
+      .proof-header {
+        margin-bottom: 16px;
+        padding-bottom: 8px;
+      }
+
+      .proof-title-sub {
+        font-size: 0.58rem;
+        letter-spacing: 0.12em;
+      }
+
+      .proof-title-main {
+        font-size: 0.98rem;
+      }
+
+      .proof-stamp {
+        font-size: 0.62rem;
+      }
+
+      /* QR Artwork Envelope kompak di mobile */
+      .artwork-envelope {
+        max-width: 216px;
+        width: 100%;
+        aspect-ratio: 1;
+        margin: 0 auto;
+      }
+
+      .crop-mark {
+        width: 18px;
+        height: 18px;
+      }
+      .crop-tl { top: -10px; left: -10px; }
+      .crop-tl::before { left: 10px; height: 8px; }
+      .crop-tl::after { top: 10px; width: 8px; }
+
+      .crop-tr { top: -10px; right: -10px; }
+      .crop-tr::before { right: 10px; height: 8px; }
+      .crop-tr::after { top: 10px; width: 8px; }
+
+      .crop-bl { bottom: -10px; left: -10px; }
+      .crop-bl::before { left: 10px; height: 8px; }
+      .crop-bl::after { bottom: 10px; width: 8px; }
+
+      .crop-br { bottom: -10px; right: -10px; }
+      .crop-br::before { right: 10px; height: 8px; }
+      .crop-br::after { bottom: 10px; width: 8px; }
+
+      .reg-top { top: -18px; }
+      .reg-bottom { bottom: -18px; }
+      .reg-left { left: -18px; }
+      .reg-right { right: -18px; }
+
+      .calibration-strip {
+        margin-top: 14px;
+        padding-top: 8px;
+      }
+
+      .swatch-box {
+        width: 11px;
+        height: 11px;
+      }
+
+      .calibration-label {
+        font-size: 0.56rem;
+      }
+
+      .proof-footer {
+        margin-top: 10px;
+        padding-top: 8px;
+        gap: 6px;
+        font-size: 0.65rem;
+      }
+
+      .meta-col .key {
+        font-size: 0.56rem;
+      }
+
+      /* 2. PANEL INPUT LANGSUNG RAPAT DI BAWAHNYA */
+      .control-panel {
+        order: 2;
+        padding: 16px 14px 44px;
+        gap: 16px;
+        border-right: none;
+        border-top: 1px solid var(--petrol-line);
+        background: var(--petrol-panel);
+      }
+
+      /* Sembunyikan banner teks raksasa di mobile agar tidak buang tempat */
+      .control-panel .brand-block {
+        display: none;
+      }
+
+      /* Letakkan tombol Unduh & Salin langsung di atas input form */
+      .actions-cluster {
+        order: -1;
+        margin-top: 0;
+        padding-top: 0;
+        border-top: none;
+        padding-bottom: 14px;
+        border-bottom: 1px solid var(--petrol-line);
+      }
+
+      .button-row {
+        gap: 8px;
+      }
+
+      .btn {
+        padding: 11px 12px;
+        font-size: 0.78rem;
+      }
+
+      .section-tag {
+        margin-bottom: 10px;
+        padding-bottom: 4px;
+      }
+
+      .form-group {
+        gap: 12px;
+      }
+
+      textarea {
+        min-height: 76px;
+        font-size: 0.9rem;
+      }
+
+      .toast {
+        left: 16px;
+        right: 16px;
+        bottom: 16px;
+        text-align: center;
+      }
+    }
   </style>
 </head>
 <body>
+
+  <!-- Mobile Top Bar Header -->
+  <header class="mobile-top-bar" aria-label="Navigasi Atas">
+    <div class="mobile-brand">
+      <span class="brand-dot"></span>
+      <span class="mobile-title">PROOFR / QR</span>
+    </div>
+    <span class="mobile-status" id="mobile-live-indicator">&bull; Live Proof</span>
+  </header>
+
   <div class="app-shell">
     
     <!-- ========================================================
@@ -903,6 +1113,24 @@
         </div>
         <h1 class="brand-title">PROOFR / QR</h1>
         <p class="brand-desc">Generator kode matriks 2D presisi tinggi dengan standarisasi lembar proof percetakan offset.</p>
+      </div>
+
+      <!-- EKSPOR & AKSI (DI MOBILE PINDAH TEPAT DI BAWAH PREVIEW) -->
+      <div class="actions-cluster">
+        <div class="button-row">
+          <a id="dlPng" class="btn btn-marigold" aria-disabled="true" href="#">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Unduh PNG
+          </a>
+          <a id="dlSvg" class="btn btn-outline" aria-disabled="true" href="#">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Unduh SVG
+          </a>
+        </div>
+        <button type="button" id="copyBtn" class="btn btn-secondary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="1"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Salin Gambar ke Clipboard
+        </button>
       </div>
 
       <!-- SECTION 01: SUMBER DATA -->
@@ -1005,27 +1233,11 @@
         </div>
       </section>
 
-      <!-- EKSPOR & AKSI -->
-      <div class="actions-cluster">
-        <div class="button-row">
-          <a id="dlPng" class="btn btn-marigold" aria-disabled="true" href="#">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Unduh PNG
-          </a>
-          <a id="dlSvg" class="btn btn-outline" aria-disabled="true" href="#">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Unduh SVG
-          </a>
-        </div>
-        <button type="button" id="copyBtn" class="btn btn-secondary">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="1"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          Salin Gambar ke Clipboard
-        </button>
-      </div>
     </aside>
 
     <!-- ========================================================
          RIGHT: PROOF STAGE (LEMBAR KERTAS PROOF CETAK)
+         DI MOBILE BERADA DI ATAS
          ======================================================== -->
     <main class="proof-stage" aria-label="Pratinjau Lembar Proof Cetak">
       <div class="stage-label-top">Ruang Kalibrasi Percetakan // Standar Uji ISO-18004</div>
@@ -1152,6 +1364,7 @@
       metaSize: $("meta-size"),
       metaInk: $("meta-ink"),
       liveIndicator: $("live-indicator"),
+      mobileLiveIndicator: $("mobile-live-indicator"),
       proofRef: $("proof-ref"),
     };
 
@@ -1221,6 +1434,11 @@
       els.copyBtn.style.pointerEvents = enabled ? "auto" : "none";
     }
 
+    function setStatusText(text) {
+      if (els.liveIndicator) els.liveIndicator.textContent = text;
+      if (els.mobileLiveIndicator) els.mobileLiveIndicator.textContent = text;
+    }
+
     function showStatusMessage(title, sub, isError) {
       els.img.hidden = true;
       els.placeholder.hidden = false;
@@ -1248,11 +1466,11 @@
 
       if (!val.trim()) {
         showStatusMessage("MENUNGGU INPUT DATA", "Ketik teks pada panel kontrol untuk memuat kode", false);
-        els.liveIndicator.textContent = "• Idle";
+        setStatusText("• Idle");
         return;
       }
 
-      els.liveIndicator.textContent = "• Memproses...";
+      setStatusText("• Memproses...");
 
       const id = ++requestId;
       try {
@@ -1268,7 +1486,7 @@
         els.img.hidden = false;
         els.placeholder.hidden = true;
         setDownloads(true);
-        els.liveIndicator.textContent = "• Proof Siap";
+        setStatusText("• Proof Siap");
 
         // Generate dynamic proof reference code based on text length and timestamp
         const hash = Math.abs(val.split("").reduce((a, b) => ((a << 5) - a + b.charCodeAt(0)) | 0, 0)) % 9999;
@@ -1276,7 +1494,7 @@
       } catch (err) {
         if (id !== requestId) return;
         showStatusMessage("KESALAHAN PEMBUATAN MATRIKS", err.message || "Gagal membuat QR code. Cek kembali isi teks.", true);
-        els.liveIndicator.textContent = "• Galat";
+        setStatusText("• Galat");
       }
     }
 
