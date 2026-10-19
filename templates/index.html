@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PROOFR — QR Matrix Print Proof</title>
+  <meta name="description" content="Generator kode QR dengan kalibrasi lembar proof cetak presisi tinggi." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      /* Palette */
+      --petrol-base: #0a2a30;
+      --petrol-deep: #05181b;
+      --petrol-panel: #0a2a30;
+      --petrol-surface: #0e353c;
+      --petrol-input: #061e23;
+      --petrol-line: #17454d;
+      --petrol-line-light: #25606b;
+      --petrol-muted: #799ea3;
+      --petrol-faint: #395f65;
+
+      --paper: #e8ebe6;
+      --paper-edge: #ccd1ca;
+      --paper-ink: #0a2a30;
+      --paper-muted: #5e7275;
+      --paper-hairline: #bcc3ba;
+
+      --marigold: #f0ae1b;
+      --marigold-hover: #f7bd38;
+      --marigold-ink: #0a2a30;
+
+      --radius-crisp: 2px;
+      --font-archivo: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      min-height: 100vh;
+      background: var(--petrol-deep);
+      color: var(--paper);
+      font-family: var(--font-archivo);
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Sharp corners & no soft blurry shadows */
+    button, input, select, textarea, .badge, .btn, .proof-sheet, .panel-card {
+      border-radius: var(--radius-crisp);
+      box-shadow: none !important;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--marigold) !important;
+      outline-offset: 1px;
+    }
+
+    /* Main Grid: Control Panel (Left) & Proof Stage (Right) */
+    .app-shell {
+      display: grid;
+      grid-template-columns: 460px 1fr;
+      min-height: 100vh;
+    }
+
+    @media (max-width: 1040px) {
+      .app-shell {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ========================================================
+       LEFT: CONTROL PANEL (PETROL GELAP)
+       ======================================================== */
+    .control-panel {
+      background: var(--petrol-panel);
+      border-right: 1px solid var(--petrol-line);
+      padding: 36px 32px 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      overflow-y: auto;
+    }
+
+    .brand-block {
+      border-bottom: 1px solid var(--petrol-line);
+      padding-bottom: 24px;
+    }
+
+    .brand-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--marigold);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .brand-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--marigold);
+      display: inline-block;
+    }
+
+    h1.brand-title {
+      font-size: 2.2rem;
+      font-weight: 900;
+      font-variation-settings: "wdth" 125, "wght" 900;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      text-transform: uppercase;
+      color: var(--paper);
+      margin-bottom: 8px;
+    }
+
+    .brand-desc {
+      color: var(--petrol-muted);
+      font-size: 0.88rem;
+      line-height: 1.45;
+    }
+
+    /* Section Headers */
+    .section-tag {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--petrol-muted);
+      border-bottom: 1px solid var(--petrol-line);
+      padding-bottom: 6px;
+      margin-bottom: 14px;
+    }
+
+    .section-tag span.num {
+      color: var(--marigold);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--paper);
+    }
+
+    textarea, select, input[type="text"] {
+      width: 100%;
+      background: var(--petrol-input);
+      border: 1px solid var(--petrol-line);
+      color: var(--paper);
+      font-family: var(--font-archivo);
+      font-size: 0.95rem;
+      padding: 10px 12px;
+      transition: border-color 0.15s ease;
+    }
+
+    textarea {
+      min-height: 105px;
+      resize: vertical;
+      line-height: 1.4;
+    }
+
+    textarea:focus, select:focus, input[type="text"]:focus {
+      border-color: var(--marigold);
+      background: #08242a;
+    }
+
+    .textarea-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: var(--petrol-muted);
+      margin-top: 2px;
+    }
+
+    /* Preset Chips */
+    .presets-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 2px;
+    }
+
+    .preset-chip {
+      background: var(--petrol-surface);
+      border: 1px solid var(--petrol-line);
+      color: var(--paper);
+      font-family: var(--font-archivo);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 4px 8px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.12s ease;
+    }
+
+    .preset-chip:hover {
+      border-color: var(--marigold);
+      color: var(--marigold);
+    }
+
+    /* Two Columns: Colors */
+    .color-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .color-picker-box {
+      background: var(--petrol-input);
+      border: 1px solid var(--petrol-line);
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    input[type="color"] {
+      -webkit-appearance: none;
+      appearance: none;
+      border: 1px solid var(--petrol-line-light);
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      background: none;
+      cursor: pointer;
+      border-radius: 0;
+      flex-shrink: 0;
+    }
+
+    input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    input[type="color"]::-webkit-color-swatch {
+      border: none;
+      border-radius: 0;
+    }
+
+    .color-info {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .color-info .title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--petrol-muted);
+      letter-spacing: 0.05em;
+    }
+
+    .color-info .code {
+      font-size: 0.88rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--paper);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Quick Colorway Swatches */
+    .quick-palettes {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .palette-btn {
+      background: var(--petrol-surface);
+      border: 1px solid var(--petrol-line);
+      padding: 6px 8px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      align-items: center;
+      transition: border-color 0.15s ease;
+    }
+
+    .palette-btn:hover {
+      border-color: var(--marigold);
+    }
+
+    .palette-pair {
+      display: flex;
+      width: 100%;
+      height: 12px;
+      border: 1px solid var(--petrol-line);
+    }
+
+    .palette-pair span {
+      flex: 1;
+      height: 100%;
+    }
+
+    .palette-name {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--petrol-muted);
+    }
+
+    /* Checkbox */
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none;
+      margin-top: 2px;
+    }
+
+    .custom-checkbox {
+      width: 18px;
+      height: 18px;
+      border: 1px solid var(--petrol-line-light);
+      background: var(--petrol-input);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+    }
+
+    .checkbox-row input {
+      display: none;
+    }
+
+    .checkbox-row input:checked + .custom-checkbox {
+      background: var(--marigold);
+      border-color: var(--marigold);
+    }
+
+    .checkbox-row input:checked + .custom-checkbox::after {
+      content: "";
+      width: 8px;
+      height: 8px;
+      background: var(--marigold-ink);
+    }
+
+    .checkbox-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--paper);
+    }
+
+    /* Notice & Contrast warning */
+    .contrast-badge {
+      display: none;
+      background: var(--petrol-surface);
+      border: 1px solid var(--marigold);
+      border-left: 4px solid var(--marigold);
+      padding: 10px 12px;
+      font-size: 0.8rem;
+      color: var(--paper);
+      line-height: 1.4;
+    }
+
+    .contrast-badge.visible {
+      display: block;
+    }
+
+    /* Action Buttons */
+    .actions-cluster {
+      margin-top: auto;
+      padding-top: 16px;
+      border-top: 1px solid var(--petrol-line);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 13px 16px;
+      font-family: var(--font-archivo);
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-decoration: none;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+    }
+
+    .btn-marigold {
+      background: var(--marigold);
+      border-color: var(--marigold);
+      color: var(--marigold-ink);
+    }
+
+    .btn-marigold:hover {
+      background: var(--marigold-hover);
+      border-color: var(--marigold-hover);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border-color: var(--paper);
+      color: var(--paper);
+    }
+
+    .btn-outline:hover {
+      background: var(--paper);
+      color: var(--petrol-base);
+    }
+
+    .btn-secondary {
+      background: var(--petrol-surface);
+      border-color: var(--petrol-line-light);
+      color: var(--paper);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--marigold);
+      color: var(--marigold);
+    }
+
+    .btn[aria-disabled="true"] {
+      opacity: 0.35;
+      pointer-events: none;
+      cursor: not-allowed;
+    }
+
+    /* ========================================================
+       RIGHT: PROOF STAGE (KERTAS PROOF CETAK)
+       ======================================================== */
+    .proof-stage {
+      background: var(--petrol-deep);
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: auto;
+    }
+
+    /* Technical grid marks in background */
+    .proof-stage::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle, var(--petrol-line) 1px, transparent 1px);
+      background-size: 32px 32px;
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    .stage-label-top {
+      position: absolute;
+      top: 16px;
+      left: 24px;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--petrol-muted);
+      z-index: 2;
+    }
+
+    .stage-controls-top {
+      position: absolute;
+      top: 16px;
+      right: 24px;
+      display: flex;
+      gap: 12px;
+      z-index: 2;
+    }
+
+    .stage-tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: var(--petrol-panel);
+      border: 1px solid var(--petrol-line);
+      padding: 4px 8px;
+      color: var(--petrol-muted);
+    }
+
+    /* THE PRINT PROOF SHEET (Kertas Abu Kehijauan #e8ebe6) */
+    .proof-sheet {
+      position: relative;
+      background: var(--paper);
+      color: var(--paper-ink);
+      width: 100%;
+      max-width: 580px;
+      border: 1px solid var(--paper-edge);
+      padding: 32px 36px;
+      display: flex;
+      flex-direction: column;
+      z-index: 3;
+    }
+
+    /* Top Proof Metadata Header */
+    .proof-header {
+      border-bottom: 1px solid var(--paper-hairline);
+      padding-bottom: 12px;
+      margin-bottom: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .proof-title-sub {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--paper-muted);
+      margin-bottom: 2px;
+    }
+
+    .proof-title-main {
+      font-size: 1.15rem;
+      font-weight: 900;
+      font-variation-settings: "wdth" 125, "wght" 900;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      color: var(--paper-ink);
+      line-height: 1.1;
+    }
+
+    .proof-stamp {
+      text-align: right;
+      font-size: 0.7rem;
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+      color: var(--paper-muted);
+      line-height: 1.35;
+    }
+
+    .proof-stamp strong {
+      color: var(--paper-ink);
+      font-weight: 800;
+    }
+
+    /* Center Artwork Canvas with Crop Marks */
+    .artwork-envelope {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1;
+      max-width: 380px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* The actual QR display bounding box */
+    .artwork-box {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: grid;
+      place-items: center;
+      background: #ffffff;
+      border: 1px dashed var(--paper-hairline);
+      overflow: hidden;
+    }
+
+    .artwork-box.transparent-preview {
+      background-image:
+        repeating-conic-gradient(#dce1db 0% 25%, #ffffff 0% 50%) 0 0 / 16px 16px;
+    }
+
+    .artwork-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      image-rendering: pixelated;
+      display: block;
+    }
+
+    .artwork-box img[hidden] {
+      display: none;
+    }
+
+    .placeholder-banner {
+      padding: 24px;
+      text-align: center;
+      color: var(--paper-muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .placeholder-cross {
+      width: 48px;
+      height: 48px;
+      border: 1px solid var(--paper-hairline);
+      position: relative;
+      display: grid;
+      place-items: center;
+    }
+
+    .placeholder-cross::before {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 1px;
+      background: var(--paper-hairline);
+    }
+
+    .placeholder-cross::after {
+      content: "";
+      position: absolute;
+      height: 100%;
+      width: 1px;
+      background: var(--paper-hairline);
+    }
+
+    .placeholder-text {
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--paper-ink);
+    }
+
+    .placeholder-sub {
+      font-size: 0.72rem;
+      color: var(--paper-muted);
+    }
+
+    .placeholder-text.error {
+      color: #9c1414;
+    }
+
+    /* TRUE PRE-PRESS CROP MARKS (TANDA POTONG PERCETAKAN) */
+    .crop-mark {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      pointer-events: none;
+    }
+
+    /* Top Left Corner */
+    .crop-tl {
+      top: -14px;
+      left: -14px;
+    }
+    .crop-tl::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 14px;
+      width: 1px;
+      height: 10px;
+      background: var(--paper-ink);
+    }
+    .crop-tl::after {
+      content: "";
+      position: absolute;
+      top: 14px;
+      left: 0;
+      width: 10px;
+      height: 1px;
+      background: var(--paper-ink);
+    }
+
+    /* Top Right Corner */
+    .crop-tr {
+      top: -14px;
+      right: -14px;
+    }
+    .crop-tr::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 14px;
+      width: 1px;
+      height: 10px;
+      background: var(--paper-ink);
+    }
+    .crop-tr::after {
+      content: "";
+      position: absolute;
+      top: 14px;
+      right: 0;
+      width: 10px;
+      height: 1px;
+      background: var(--paper-ink);
+    }
+
+    /* Bottom Left Corner */
+    .crop-bl {
+      bottom: -14px;
+      left: -14px;
+    }
+    .crop-bl::before {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 14px;
+      width: 1px;
+      height: 10px;
+      background: var(--paper-ink);
+    }
+    .crop-bl::after {
+      content: "";
+      position: absolute;
+      bottom: 14px;
+      left: 0;
+      width: 10px;
+      height: 1px;
+      background: var(--paper-ink);
+    }
+
+    /* Bottom Right Corner */
+    .crop-br {
+      bottom: -14px;
+      right: -14px;
+    }
+    .crop-br::before {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      right: 14px;
+      width: 1px;
+      height: 10px;
+      background: var(--paper-ink);
+    }
+    .crop-br::after {
+      content: "";
+      position: absolute;
+      bottom: 14px;
+      right: 0;
+      width: 10px;
+      height: 1px;
+      background: var(--paper-ink);
+    }
+
+    /* Registration Crosshairs */
+    .reg-mark {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      pointer-events: none;
+    }
+    .reg-top {
+      top: -24px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .reg-bottom {
+      bottom: -24px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .reg-left {
+      left: -24px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .reg-right {
+      right: -24px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    /* Color Calibration / Pre-Press Strip */
+    .calibration-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 28px;
+      padding-top: 12px;
+      border-top: 1px solid var(--paper-hairline);
+    }
+
+    .swatches-bar {
+      display: flex;
+      gap: 4px;
+    }
+
+    .swatch-box {
+      width: 14px;
+      height: 14px;
+      border: 1px solid var(--paper-edge);
+    }
+
+    .swatch-100 { background: #0a2a30; }
+    .swatch-75  { background: #465f64; }
+    .swatch-50  { background: #849698; }
+    .swatch-25  { background: #c2cccc; }
+    .swatch-acc { background: #f0ae1b; }
+
+    .calibration-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--paper-muted);
+    }
+
+    /* Margin Technical Specifications */
+    .proof-footer {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--paper-hairline);
+      font-size: 0.72rem;
+    }
+
+    .meta-col {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .meta-col .key {
+      font-size: 0.64rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--paper-muted);
+    }
+
+    .meta-col .val {
+      font-weight: 800;
+      color: var(--paper-ink);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Copied Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--marigold);
+      color: var(--marigold-ink);
+      font-weight: 800;
+      font-size: 0.82rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 10px 18px;
+      border: 1px solid var(--marigold);
+      display: none;
+      z-index: 9999;
+    }
+
+    .toast.show {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    
+    <!-- ========================================================
+         LEFT: CONTROL PANEL (PETROL GELAP #0a2a30)
+         ======================================================== -->
+    <aside class="control-panel" aria-label="Panel Pengaturan">
+      <div class="brand-block">
+        <div class="brand-meta">
+          <span class="brand-dot"></span>
+          <span>Proof Cetak &bull; Kalibrasi V.02</span>
+        </div>
+        <h1 class="brand-title">PROOFR / QR</h1>
+        <p class="brand-desc">Generator kode matriks 2D presisi tinggi dengan standarisasi lembar proof percetakan offset.</p>
+      </div>
+
+      <!-- SECTION 01: SUMBER DATA -->
+      <section class="form-group" aria-labelledby="sec-01">
+        <div class="section-tag" id="sec-01">
+          <span>01 // Sumber Data</span>
+          <span class="num">Teks / URL</span>
+        </div>
+
+        <div class="field">
+          <label for="text">Teks atau URL Tujuan</label>
+          <textarea id="text" maxlength="1000" placeholder="https://contoh-domain.id/tautan-anda" autofocus>https://antigravity.dev</textarea>
+          <div class="textarea-meta">
+            <span>Maksimal 1000 karakter</span>
+            <div><span id="count">0</span> / 1000</div>
+          </div>
+          <div class="presets-row">
+            <button type="button" class="preset-chip" data-sample="https://antigravity.dev">Website</button>
+            <button type="button" class="preset-chip" data-sample="WIFI:S:Kantor_Proof;T:WPA;P:Percetakan2026;;">WiFi</button>
+            <button type="button" class="preset-chip" data-sample="MECARD:N:Ibnu;ORG:Studio Grafika;TEL:+628123456789;;">Kontak</button>
+            <button type="button" class="preset-chip" data-sample="ARCHIVE REF: ISO-18004-MATRIX-PROOF">Teks Polos</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 02: TINTA & MEDIA -->
+      <section class="form-group" aria-labelledby="sec-02">
+        <div class="section-tag" id="sec-02">
+          <span>02 // Tinta &amp; Substrat</span>
+          <span class="num">Warna</span>
+        </div>
+
+        <div class="color-grid">
+          <div class="color-picker-box">
+            <input type="color" id="fg" value="#0a2a30" aria-label="Warna Tinta QR" />
+            <div class="color-info">
+              <span class="title">Tinta QR</span>
+              <span class="code" id="fg-hex">#0A2A30</span>
+            </div>
+          </div>
+
+          <div class="color-picker-box">
+            <input type="color" id="bg" value="#e8ebe6" aria-label="Warna Kertas Substrat" />
+            <div class="color-info">
+              <span class="title">Kertas Latar</span>
+              <span class="code" id="bg-hex">#E8EBE6</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Palet Cepat Bawaan -->
+        <div class="field">
+          <label style="font-size: 0.72rem; color: var(--petrol-muted);">Palet Bawaan Spesifikasi</label>
+          <div class="quick-palettes">
+            <button type="button" class="palette-btn" data-fg="#0a2a30" data-bg="#e8ebe6" data-name="Studio Proof" title="Tinta Petrol Gelap &amp; Kertas Abu Kehijauan">
+              <div class="palette-pair"><span style="background: #0a2a30;"></span><span style="background: #e8ebe6;"></span></div>
+              <span class="palette-name">Proof</span>
+            </button>
+            <button type="button" class="palette-btn" data-fg="#f0ae1b" data-bg="#0a2a30" data-name="Marigold Dark" title="Kuning Marigold &amp; Petrol Gelap">
+              <div class="palette-pair"><span style="background: #f0ae1b;"></span><span style="background: #0a2a30;"></span></div>
+              <span class="palette-name">Marigold</span>
+            </button>
+            <button type="button" class="palette-btn" data-fg="#000000" data-bg="#ffffff" data-name="Monokrom" title="Hitam Standar &amp; Putih Bersih">
+              <div class="palette-pair"><span style="background: #000000;"></span><span style="background: #ffffff;"></span></div>
+              <span class="palette-name">Mono</span>
+            </button>
+            <button type="button" class="palette-btn" data-fg="#0a2a30" data-bg="#ffffff" data-name="Petrol Putih" title="Petrol &amp; Putih">
+              <div class="palette-pair"><span style="background: #0a2a30;"></span><span style="background: #ffffff;"></span></div>
+              <span class="palette-name">Petrol</span>
+            </button>
+          </div>
+        </div>
+
+        <label class="checkbox-row" for="transparent">
+          <input type="checkbox" id="transparent" />
+          <span class="custom-checkbox"></span>
+          <span class="checkbox-label">Latar transparan (tanpa warna substrat)</span>
+        </label>
+
+        <!-- Warning Kontras -->
+        <div id="hint" class="contrast-badge" role="status"></div>
+      </section>
+
+      <!-- SECTION 03: RESOLUSI EKSPOR -->
+      <section class="form-group" aria-labelledby="sec-03">
+        <div class="section-tag" id="sec-03">
+          <span>03 // Kalibrasi Ekspor</span>
+          <span class="num">Ukuran</span>
+        </div>
+
+        <div class="field">
+          <label for="size">Dimensi Master Matriks</label>
+          <select id="size">
+            <option value="256">256 &times; 256 px &mdash; Web / Thumbnail</option>
+            <option value="400">400 &times; 400 px &mdash; Standar Kartu Nama</option>
+            <option value="600" selected>600 &times; 600 px &mdash; Uji Proof Cetak (Disarankan)</option>
+            <option value="800">800 &times; 800 px &mdash; Brosur / Kemasan</option>
+            <option value="1200">1200 &times; 1200 px &mdash; Poster / Cetak Format Besar</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- EKSPOR & AKSI -->
+      <div class="actions-cluster">
+        <div class="button-row">
+          <a id="dlPng" class="btn btn-marigold" aria-disabled="true" href="#">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Unduh PNG
+          </a>
+          <a id="dlSvg" class="btn btn-outline" aria-disabled="true" href="#">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Unduh SVG
+          </a>
+        </div>
+        <button type="button" id="copyBtn" class="btn btn-secondary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="1"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Salin Gambar ke Clipboard
+        </button>
+      </div>
+    </aside>
+
+    <!-- ========================================================
+         RIGHT: PROOF STAGE (LEMBAR KERTAS PROOF CETAK)
+         ======================================================== -->
+    <main class="proof-stage" aria-label="Pratinjau Lembar Proof Cetak">
+      <div class="stage-label-top">Ruang Kalibrasi Percetakan // Standar Uji ISO-18004</div>
+      <div class="stage-controls-top">
+        <span class="stage-tag" id="live-indicator">&bull; Live Render</span>
+        <span class="stage-tag">Skala 1:1</span>
+      </div>
+
+      <!-- KERTAS PROOF CETAK (WARNA #e8ebe6) -->
+      <article class="proof-sheet" id="proofSheet">
+        
+        <!-- Header Dokumen Cetak -->
+        <header class="proof-header">
+          <div>
+            <div class="proof-title-sub">LEMBAR UJI PROOF PERCETAKAN &bull; MASTER PLATE</div>
+            <div class="proof-title-main">QR MATRIX 2D PROOF</div>
+          </div>
+          <div class="proof-stamp">
+            <div>REF: <strong id="proof-ref">PRF-2026-X01</strong></div>
+            <div>STATUS: <strong>VERIFIKASI</strong></div>
+          </div>
+        </header>
+
+        <!-- Area Gambar Utama dengan Crop Marks -->
+        <div class="artwork-envelope">
+          
+          <!-- Corner Crop Marks (Tanda Potong) -->
+          <div class="crop-mark crop-tl" aria-hidden="true"></div>
+          <div class="crop-mark crop-tr" aria-hidden="true"></div>
+          <div class="crop-mark crop-bl" aria-hidden="true"></div>
+          <div class="crop-mark crop-br" aria-hidden="true"></div>
+
+          <!-- Registration Marks (Crosshairs) -->
+          <svg class="reg-mark reg-top" viewBox="0 0 14 14" aria-hidden="true">
+            <circle cx="7" cy="7" r="4.5" fill="none" stroke="#0a2a30" stroke-width="0.8"/>
+            <line x1="7" y1="0" x2="7" y2="14" stroke="#0a2a30" stroke-width="0.8"/>
+            <line x1="0" y1="7" x2="14" y2="7" stroke="#0a2a30" stroke-width="0.8"/>
+          </svg>
+          <svg class="reg-mark reg-bottom" viewBox="0 0 14 14" aria-hidden="true">
+            <circle cx="7" cy="7" r="4.5" fill="none" stroke="#0a2a30" stroke-width="0.8"/>
+            <line x1="7" y1="0" x2="7" y2="14" stroke="#0a2a30" stroke-width="0.8"/>
+            <line x1="0" y1="7" x2="14" y2="7" stroke="#0a2a30" stroke-width="0.8"/>
+          </svg>
+          <svg class="reg-mark reg-left" viewBox="0 0 14 14" aria-hidden="true">
+            <circle cx="7" cy="7" r="4.5" fill="none" stroke="#0a2a30" stroke-width="0.8"/>
+            <line x1="7" y1="0" x2="7" y2="14" stroke="#0a2a30" stroke-width="0.8"/>
+            <line x1="0" y1="7" x2="14" y2="7" stroke="#0a2a30" stroke-width="0.8"/>
+          </svg>
+          <svg class="reg-mark reg-right" viewBox="0 0 14 14" aria-hidden="true">
+            <circle cx="7" cy="7" r="4.5" fill="none" stroke="#0a2a30" stroke-width="0.8"/>
+            <line x1="7" y1="0" x2="7" y2="14" stroke="#0a2a30" stroke-width="0.8"/>
+            <line x1="0" y1="7" x2="14" y2="7" stroke="#0a2a30" stroke-width="0.8"/>
+          </svg>
+
+          <!-- Bounding Box Artwork -->
+          <div class="artwork-box" id="artworkBox">
+            <img id="img" alt="QR Code Matriks Proof" hidden />
+            <div id="placeholder" class="placeholder-banner">
+              <div class="placeholder-cross"></div>
+              <div>
+                <p id="placeholder-title" class="placeholder-text">MENUNGGU INPUT DATA</p>
+                <p id="placeholder-sub" class="placeholder-sub">Ketik teks pada panel kontrol untuk memuat kode</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Calibration & Density Strip -->
+        <div class="calibration-strip" aria-hidden="true">
+          <div class="swatches-bar">
+            <div class="swatch-box swatch-100" title="100% Tinta Petrol"></div>
+            <div class="swatch-box swatch-75" title="75% Raster"></div>
+            <div class="swatch-box swatch-50" title="50% Raster"></div>
+            <div class="swatch-box swatch-25" title="25% Raster"></div>
+            <div class="swatch-box swatch-acc" title="Aksen Kuning Marigold"></div>
+          </div>
+          <span class="calibration-label">KALIBRASI DENSITAS // OFFSET PRINT READY</span>
+        </div>
+
+        <!-- Margin Technical Metadata (Info Ukuran & Spesifikasi Cetak) -->
+        <footer class="proof-footer">
+          <div class="meta-col">
+            <span class="key">Dimensi Ekspor</span>
+            <span class="val" id="meta-size">600 &times; 600 PX</span>
+          </div>
+          <div class="meta-col">
+            <span class="key">Tinta / Substrat</span>
+            <span class="val" id="meta-ink">#0A2A30 / #E8EBE6</span>
+          </div>
+          <div class="meta-col">
+            <span class="key">Koreksi Galat</span>
+            <span class="val">LEVEL M (~15%)</span>
+          </div>
+        </footer>
+
+      </article>
+    </main>
+
+  </div>
+
+  <div id="toast" class="toast" role="alert">Gambar Berhasil Disalin!</div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const els = {
+      text: $("text"),
+      size: $("size"),
+      fg: $("fg"),
+      bg: $("bg"),
+      fgHex: $("fg-hex"),
+      bgHex: $("bg-hex"),
+      transparent: $("transparent"),
+      count: $("count"),
+      img: $("img"),
+      placeholder: $("placeholder"),
+      placeholderTitle: $("placeholder-title"),
+      placeholderSub: $("placeholder-sub"),
+      artworkBox: $("artworkBox"),
+      hint: $("hint"),
+      dlPng: $("dlPng"),
+      dlSvg: $("dlSvg"),
+      copyBtn: $("copyBtn"),
+      toast: $("toast"),
+      metaSize: $("meta-size"),
+      metaInk: $("meta-ink"),
+      liveIndicator: $("live-indicator"),
+      proofRef: $("proof-ref"),
+    };
+
+    let timer = null;
+    let requestId = 0;
+    let objectUrl = null;
+    let currentBlob = null;
+
+    // Build URL query string
+    function query(size) {
+      return new URLSearchParams({
+        text: els.text.value.trim(),
+        size: size,
+        fg: els.fg.value,
+        bg: els.bg.value,
+        transparent: els.transparent.checked ? "1" : "0",
+      }).toString();
+    }
+
+    // Relative luminance for contrast calculation
+    function luminance(hex) {
+      const [r, g, b] = [1, 3, 5].map((i) => {
+        const c = parseInt(hex.slice(i, i + 2), 16) / 255;
+        return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+      });
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    }
+
+    function checkContrast() {
+      if (els.transparent.checked) return "";
+      const a = luminance(els.fg.value);
+      const b = luminance(els.bg.value);
+      const ratio = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+
+      if (ratio < 2.8) {
+        return "Perhatian: Rasio kontras rendah (" + ratio.toFixed(1) + ":1). Kode QR berpotensi sulit terbaca oleh pemindai optik.";
+      }
+      if (a > b) {
+        return "Perhatian: Warna kode lebih terang dibanding substrat latar. Standar ISO merekomendasikan kode lebih gelap.";
+      }
+      return "";
+    }
+
+    function updateColorLabels() {
+      const fgVal = els.fg.value.toUpperCase();
+      const bgVal = els.bg.value.toUpperCase();
+      els.fgHex.textContent = fgVal;
+      els.bgHex.textContent = bgVal;
+      
+      const subLabel = els.transparent.checked ? "TRANSPARAN" : bgVal;
+      els.metaInk.textContent = `${fgVal} / ${subLabel}`;
+
+      els.artworkBox.classList.toggle("transparent-preview", els.transparent.checked);
+    }
+
+    function setDownloads(enabled) {
+      const sizeVal = els.size.value;
+      els.metaSize.textContent = `${sizeVal} × ${sizeVal} PX`;
+
+      for (const [el, fmt] of [[els.dlPng, "png"], [els.dlSvg, "svg"]]) {
+        el.setAttribute("aria-disabled", enabled ? "false" : "true");
+        el.href = enabled ? `/qr/${fmt}?${query(sizeVal)}&download=1` : "#";
+      }
+
+      els.copyBtn.disabled = !enabled;
+      els.copyBtn.style.opacity = enabled ? "1" : "0.4";
+      els.copyBtn.style.pointerEvents = enabled ? "auto" : "none";
+    }
+
+    function showStatusMessage(title, sub, isError) {
+      els.img.hidden = true;
+      els.placeholder.hidden = false;
+      els.placeholderTitle.textContent = title;
+      els.placeholderTitle.classList.toggle("error", Boolean(isError));
+      els.placeholderSub.textContent = sub;
+      setDownloads(false);
+    }
+
+    async function update() {
+      const val = els.text.value;
+      els.count.textContent = val.length;
+
+      // Update contrast warning
+      const warning = checkContrast();
+      if (warning) {
+        els.hint.textContent = warning;
+        els.hint.classList.add("visible");
+      } else {
+        els.hint.classList.remove("visible");
+        els.hint.textContent = "";
+      }
+
+      updateColorLabels();
+
+      if (!val.trim()) {
+        showStatusMessage("MENUNGGU INPUT DATA", "Ketik teks pada panel kontrol untuk memuat kode", false);
+        els.liveIndicator.textContent = "• Idle";
+        return;
+      }
+
+      els.liveIndicator.textContent = "• Memproses...";
+
+      const id = ++requestId;
+      try {
+        const res = await fetch(`/qr/png?${query(480)}`);
+        if (!res.ok) throw new Error(await res.text());
+        const blob = await res.blob();
+        if (id !== requestId) return;
+
+        currentBlob = blob;
+        if (objectUrl) URL.revokeObjectURL(objectUrl);
+        objectUrl = URL.createObjectURL(blob);
+        els.img.src = objectUrl;
+        els.img.hidden = false;
+        els.placeholder.hidden = true;
+        setDownloads(true);
+        els.liveIndicator.textContent = "• Proof Siap";
+
+        // Generate dynamic proof reference code based on text length and timestamp
+        const hash = Math.abs(val.split("").reduce((a, b) => ((a << 5) - a + b.charCodeAt(0)) | 0, 0)) % 9999;
+        els.proofRef.textContent = `PRF-${new Date().getFullYear()}-${String(hash).padStart(4, "0")}`;
+      } catch (err) {
+        if (id !== requestId) return;
+        showStatusMessage("KESALAHAN PEMBUATAN MATRIKS", err.message || "Gagal membuat QR code. Cek kembali isi teks.", true);
+        els.liveIndicator.textContent = "• Galat";
+      }
+    }
+
+    function schedule() {
+      clearTimeout(timer);
+      timer = setTimeout(update, 200);
+    }
+
+    // Event Listeners
+    for (const el of [els.text, els.fg, els.bg, els.transparent]) {
+      el.addEventListener("input", schedule);
+    }
+
+    els.size.addEventListener("change", () => {
+      setDownloads(Boolean(els.text.value.trim()) && !els.img.hidden);
+    });
+
+    // Preset Text Samples
+    document.querySelectorAll(".preset-chip").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        els.text.value = btn.dataset.sample;
+        schedule();
+      });
+    });
+
+    // Preset Colorways
+    document.querySelectorAll(".palette-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        els.fg.value = btn.dataset.fg;
+        els.bg.value = btn.dataset.bg;
+        els.transparent.checked = false;
+        schedule();
+      });
+    });
+
+    // Copy Image to Clipboard
+    els.copyBtn.addEventListener("click", async () => {
+      if (!currentBlob) return;
+      try {
+        await navigator.clipboard.write([
+          new ClipboardItem({ "image/png": currentBlob })
+        ]);
+        showToast("Gambar Berhasil Disalin!");
+      } catch (err) {
+        showToast("Gagal menyalin gambar langsung.");
+      }
+    });
+
+    function showToast(msg) {
+      els.toast.textContent = msg;
+      els.toast.classList.add("show");
+      setTimeout(() => els.toast.classList.remove("show"), 2200);
+    }
+
+    // Initial render
+    update();
+  </script>
+</body>
+</html>
